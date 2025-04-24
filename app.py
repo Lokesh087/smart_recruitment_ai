@@ -3,6 +3,8 @@ from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
 from chatbot import get_bot_reply
+from resume_parser import extract_resume_text, parse_resume
+from matcher import calculate_match_score
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
@@ -23,6 +25,8 @@ def upload_resume():
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['resume']
+    job_description = request.form.get('job_description', '')
+
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
@@ -30,7 +34,16 @@ def upload_resume():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
-        return jsonify({'message': f'Resume uploaded successfully: {filename}'}), 200
+
+        text = extract_resume_text(filepath)
+        parsed = parse_resume(text)
+        score = calculate_match_score(text, job_description)
+
+        return jsonify({
+            'message': f'Resume uploaded successfully: {filename}',
+            'parsed_resume': parsed,
+            'match_score': f"{score}%"
+        }), 200
     else:
         return jsonify({'error': 'Invalid file type'}), 400
 
@@ -43,3 +56,4 @@ def chat():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
