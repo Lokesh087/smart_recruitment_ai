@@ -2,3 +2,8 @@ streamlit
 Flask
 flask-cors
 python-dotenv
+spacy
+sentence-transformers
+pdfplumber
+python-docx
+
