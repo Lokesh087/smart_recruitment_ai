@@ -1,3 +1,4 @@
+streamlit
 Flask
 flask-cors
 python-dotenv
