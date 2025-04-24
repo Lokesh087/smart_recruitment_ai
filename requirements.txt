@@ -1,4 +1,4 @@
-streamlit
+gunicorn
 Flask
 flask-cors
 python-dotenv
