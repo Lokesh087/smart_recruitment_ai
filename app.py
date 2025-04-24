@@ -19,6 +19,12 @@ if not os.path.exists(UPLOAD_FOLDER):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+# Home route for Render to verify service
+@app.route('/')
+def index():
+    return "Smart Recruitment AI is up and running!"
+
 @app.route('/api/resume', methods=['POST'])
 def upload_resume():
     if 'resume' not in request.files:
