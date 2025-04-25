@@ -19,8 +19,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-# Home route for Render to verify service
 @app.route('/')
 def index():
     return "Smart Recruitment AI is up and running!"
@@ -28,19 +26,24 @@ def index():
 @app.route('/api/resume', methods=['POST'])
 def upload_resume():
     if 'resume' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+        return jsonify({'error': 'Missing file field "resume" in form-data'}), 400
 
     file = request.files['resume']
+    if not file or file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file type. Allowed: pdf, doc, docx'}), 400
+
     job_description = request.form.get('job_description', '')
+    if not job_description:
+        return jsonify({'error': 'Missing job_description field'}), 400
 
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-
+    try:
         text = extract_resume_text(filepath)
         parsed = parse_resume(text)
         score = calculate_match_score(text, job_description)
@@ -50,18 +53,22 @@ def upload_resume():
             'parsed_resume': parsed,
             'match_score': f"{score}%"
         }), 200
-    else:
-        return jsonify({'error': 'Invalid file type'}), 400
+    except Exception as e:
+        return jsonify({'error': f'Processing failed: {str(e)}'}), 500
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.get_json()
     message = data.get('message', '')
+    if not message:
+        return jsonify({'error': 'Empty message'}), 400
+
     response = get_bot_reply(message)
     return jsonify({'reply': response})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
 
 
