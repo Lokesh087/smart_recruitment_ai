@@ -1,3 +1,8 @@
-git add render.yaml
-git commit -m "Add render.yaml"
-git push
+services:
+  - type: web
+    name: smart-recruitment-ai
+    env: python
+    buildCommand: ""
+    startCommand: python app.py
+    branch: main
+    region: oregon
