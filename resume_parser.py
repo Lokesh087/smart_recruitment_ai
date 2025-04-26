@@ -1,6 +1,10 @@
+import os
 import pdfplumber
 import docx
-import os
+import spacy
+
+# Preload spaCy model at module level
+nlp = spacy.load("en_core_web_sm")
 
 def extract_text_from_pdf(file_path):
     text = ''
@@ -22,10 +26,6 @@ def extract_resume_text(file_path):
     return ""
 
 def parse_resume(text):
-    # Load spaCy model only when this function is called
-    import spacy
-    nlp = spacy.load("en_core_web_sm")
-
     doc = nlp(text)
     entities = {
         "email": None,
@@ -45,3 +45,4 @@ def parse_resume(text):
     tokens = [token.text.lower() for token in doc if token.pos_ == "NOUN"]
     entities["skills"] = list(set(tokens))
     return entities
+
