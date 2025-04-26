@@ -10,20 +10,17 @@
 <body>
 
   <nav>
-    <div class="logo">Bot</div>
+    <div class="logo">RecruitBot</div>
     <ul class="nav-links">
       <li><a href="#home">Home</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#contact">Contact</a></li>
-
     </ul>
     <div class="login-dropdown">
       <button class="login-btn">Login ▼</button>
       <div class="dropdown-content">
-        <a href="https:www.google.com" target="_blank">        <button onclick="googleLogin()" class="google">Login with Google</button>
-        </a>
-        <a href="https:www.facebook.com" target="_blank">        <button onclick="facebookLogin()" class="facebook">Login with Facebook</button>
-        </a>
+        <button onclick="window.open('https://www.google.com', '_blank')" class="google">Login with Google</button>
+        <button onclick="window.open('https://www.facebook.com', '_blank')" class="facebook">Login with Facebook</button>
       </div>
     </div>
   </nav>
@@ -33,13 +30,12 @@
       <h1>AI Recruitment Assistant</h1>
       <p>Ask me about job openings, interview tips, and resume feedback.</p>
       <button class="open-chatbot">Open Chatbot</button> 
-      <br> <br> <br> 
+      <br><br><br>
       <div class="resume-upload">
         <label for="resume">Upload Resume (PDF/DOC):</label>
-        <input type="file"  id="resume" accept=".pdf,.doc,.docx" />
+        <input type="file" id="resume" accept=".pdf,.doc,.docx" />
         <p id="resume-status"></p>
       </div>
-      
     </div>
   </section>
 
@@ -60,14 +56,11 @@
   <section class="hero" id="about">
     <div class="hero-content">
       <h2>About Us</h2>
-
-<h1>🚀 Revolutionizing Talent Acquisition with Artificial Intelligence</h1>
-<p>An **AI-Driven Smart Recruitment System** revolutionizes the hiring process by leveraging artificial intelligence to automate resume screening, intelligently match candidates to job roles, and engage applicants through real-time chatbot interactions. It enhances efficiency, reduces bias, and accelerates decision-making by analyzing large volumes of applicant data with precision. By predicting candidate success and improving the overall candidate experience, this system empowers recruiters to focus on strategic hiring while saving time and cost, ultimately helping organizations build stronger, more diverse teams with ease.</p>
-
-      </div>
-      
-  
+      <h3>🚀 Revolutionizing Talent Acquisition with Artificial Intelligence</h3>
+      <p>An <strong>AI-Driven Smart Recruitment System</strong> revolutionizes the hiring process by leveraging artificial intelligence to automate resume screening, intelligently match candidates to job roles, and engage applicants through real-time chatbot interactions. It enhances efficiency, reduces bias, and accelerates decision-making by analyzing large volumes of applicant data with precision. By predicting candidate success and improving the overall candidate experience, this system empowers recruiters to focus on strategic hiring while saving time and cost, ultimately helping organizations build stronger, more diverse teams with ease.</p>
+    </div>
   </section>
+
   <section class="contact-section" id="contact">
     <div class="contact-container">
       <h2>Contact Us</h2>
@@ -81,7 +74,11 @@
       </form>
     </div>
   </section>
-  <script src="script.js" ></script>
 
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden"></div>
+
+  <script src="script.js"></script>
 </body>
 </html>
+
