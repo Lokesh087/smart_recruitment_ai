@@ -1,3 +1,6 @@
+cython
+setuptools
+wheel
 Flask
 flask-cors
 python-dotenv
@@ -7,3 +10,4 @@ pdfplumber
 gunicorn
 python-docx
 werkzeug
+
