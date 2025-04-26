@@ -1,0 +1,281 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #f4f7fa;
+  color: #333;
+}
+
+.hero {
+  height: 100vh;
+  background: linear-gradient(135deg, #2c3e50, #3498db);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.open-chatbot {
+  padding: 12px 24px;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #2c3e50;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.chatbot-container {
+  width: 350px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatbot-container.hidden {
+  display: none;
+}
+
+.chat-header {
+  background-color: #3498db;
+  padding: 15px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-box {
+  padding: 15px;
+  height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bot-message,
+.user-message {
+  background: #ecf0f1;
+  padding: 10px 15px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: #d1e7dd;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+.chat-input button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.resume-upload {
+  padding: 10px 15px;
+  border-top: 1px solid #b93030;
+  background: #eecccc;
+  text-align: center;
+  color: rgb(12, 12, 12);
+}
+
+.resume-upload label {
+  font-size: 20px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.resume-upload input[type="file"] {
+  margin-top: 5px;
+  border: 1px solid #e4c2c2;
+  padding: 8px;
+  border-radius: 5px;
+  width: 90%;
+}
+
+#resume-status {
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: #196bbd;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: Arial, sans-serif;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c3e50;
+  color: white;
+  padding: 15px 30px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.login-dropdown {
+  position: relative;
+}
+
+.login-btn {
+  background: #1abc9c;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: white;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dropdown-content button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: white;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dropdown-content button:hover {
+  background: #f1f1f1;
+}
+
+.google {
+  color: #db4437;
+}
+
+.facebook {
+  color: #3b5998;
+}
+
+.login-dropdown:hover .dropdown-content {
+  display: block;
+}
+.contact-section {
+  padding: 60px 20px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a4b9ce, #dee4e9);
+
+}
+
+.contact-container {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+ h2 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #31e90d;
+}
+
+.contact-container p {
+  font-size: 16px;
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.contact-form button {
+  background-color: #4b749c;
+  color: #f3ebeb;
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.contact-form button:hover {
+  background-color: #1abc9c;
+}
