@@ -10,6 +10,7 @@ const userInput = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 const resumeInput = document.getElementById("resume");
 const resumeStatus = document.getElementById("resume-status");
+const toast = document.getElementById("toast");
 
 // Show/hide chatbot
 openBtn.addEventListener("click", () => {
@@ -19,10 +20,8 @@ closeBtn.addEventListener("click", () => {
   chatbot.classList.add("hidden");
 });
 
-// Send message via button
+// Send message via button or Enter (without Shift)
 sendBtn.addEventListener("click", sendMessage);
-
-// Send message via Enter key (without Shift)
 userInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -39,6 +38,16 @@ function addMessage(sender, text) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Show toast message
+function showToast(message, color = "#27ae60") {
+  toast.textContent = message;
+  toast.style.backgroundColor = color;
+  toast.classList.remove("hidden");
+  setTimeout(() => {
+    toast.classList.add("hidden");
+  }, 3000);
+}
+
 // Send chat message to Flask backend
 async function sendMessage() {
   const msg = userInput.value.trim();
@@ -47,11 +56,11 @@ async function sendMessage() {
   addMessage("user", msg);
   userInput.value = "";
 
-  // Show "Typing..." loading message
-  const typingMsg = document.createElement("div");
-  typingMsg.className = "bot-message";
-  typingMsg.textContent = "Typing...";
-  chatBox.appendChild(typingMsg);
+  // Typing animation
+  const typingDots = document.createElement("div");
+  typingDots.className = "bot-message typing";
+  typingDots.textContent = "RecruitBot is typing...";
+  chatBox.appendChild(typingDots);
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
@@ -63,8 +72,7 @@ async function sendMessage() {
       body: JSON.stringify({ message: msg }),
     });
 
-    // Remove "Typing..." message
-    typingMsg.remove();
+    typingDots.remove();
 
     if (!res.ok) {
       addMessage("bot", "Oops! Server error.");
@@ -75,11 +83,11 @@ async function sendMessage() {
     if (data.reply) {
       addMessage("bot", data.reply);
     } else {
-      addMessage("bot", "Hmm, I didn't get that.");
+      addMessage("bot", "Hmm, I didn’t get that.");
     }
   } catch (error) {
-    typingMsg.remove();
-    addMessage("bot", "Sorry, I couldn't reach the server.");
+    typingDots.remove();
+    addMessage("bot", "Sorry, I couldn’t reach the server.");
   }
 }
 
@@ -97,18 +105,20 @@ resumeInput.addEventListener("change", async () => {
   if (!validTypes.includes(file.type)) {
     resumeStatus.textContent = "Please upload a valid PDF or Word document.";
     resumeStatus.style.color = "red";
+    showToast("Invalid file type.", "red");
     return;
   }
 
-  // Check file size (Max 5MB)
   if (file.size > 5 * 1024 * 1024) {
     resumeStatus.textContent = "File too large. Max 5MB allowed.";
     resumeStatus.style.color = "red";
+    showToast("File too large!", "red");
     return;
   }
 
   const formData = new FormData();
   formData.append("resume", file);
+  formData.append("job_description", "Frontend Developer"); // default or dynamic
 
   resumeStatus.textContent = "Uploading...";
   resumeStatus.style.color = "#3498db";
@@ -124,12 +134,16 @@ resumeInput.addEventListener("change", async () => {
     if (response.ok) {
       resumeStatus.textContent = result.message;
       resumeStatus.style.color = "#27ae60";
+      resumeInput.value = "";
+      showToast("Resume uploaded successfully!");
     } else {
       resumeStatus.textContent = result.error || "Upload failed.";
       resumeStatus.style.color = "red";
+      showToast(result.error || "Upload failed.", "red");
     }
   } catch (err) {
     resumeStatus.textContent = "Upload failed. Server may be offline.";
     resumeStatus.style.color = "red";
+    showToast("Server not reachable.", "red");
   }
 });
