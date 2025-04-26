@@ -1,3 +1,7 @@
+// Base URL for backend API
+const BASE_URL = "http://localhost:5000";
+
+// Get DOM elements
 const openBtn = document.querySelector(".open-chatbot");
 const chatbot = document.querySelector(".chatbot-container");
 const closeBtn = document.querySelector(".close-chat");
@@ -15,10 +19,15 @@ closeBtn.addEventListener("click", () => {
   chatbot.classList.add("hidden");
 });
 
-// Send message via button or Enter
+// Send message via button
 sendBtn.addEventListener("click", sendMessage);
+
+// Send message via Enter key (without Shift)
 userInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendMessage();
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 
 // Add message to chat box
@@ -38,8 +47,15 @@ async function sendMessage() {
   addMessage("user", msg);
   userInput.value = "";
 
+  // Show "Typing..." loading message
+  const typingMsg = document.createElement("div");
+  typingMsg.className = "bot-message";
+  typingMsg.textContent = "Typing...";
+  chatBox.appendChild(typingMsg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
   try {
-    const res = await fetch("http://localhost:5000/api/chat", {
+    const res = await fetch(`${BASE_URL}/api/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,9 +63,22 @@ async function sendMessage() {
       body: JSON.stringify({ message: msg }),
     });
 
+    // Remove "Typing..." message
+    typingMsg.remove();
+
+    if (!res.ok) {
+      addMessage("bot", "Oops! Server error.");
+      return;
+    }
+
     const data = await res.json();
-    addMessage("bot", data.reply);
+    if (data.reply) {
+      addMessage("bot", data.reply);
+    } else {
+      addMessage("bot", "Hmm, I didn't get that.");
+    }
   } catch (error) {
+    typingMsg.remove();
     addMessage("bot", "Sorry, I couldn't reach the server.");
   }
 }
@@ -71,11 +100,21 @@ resumeInput.addEventListener("change", async () => {
     return;
   }
 
+  // Check file size (Max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    resumeStatus.textContent = "File too large. Max 5MB allowed.";
+    resumeStatus.style.color = "red";
+    return;
+  }
+
   const formData = new FormData();
   formData.append("resume", file);
 
+  resumeStatus.textContent = "Uploading...";
+  resumeStatus.style.color = "#3498db";
+
   try {
-    const response = await fetch("http://localhost:5000/api/resume", {
+    const response = await fetch(`${BASE_URL}/api/resume`, {
       method: "POST",
       body: formData,
     });
@@ -86,7 +125,7 @@ resumeInput.addEventListener("change", async () => {
       resumeStatus.textContent = result.message;
       resumeStatus.style.color = "#27ae60";
     } else {
-      resumeStatus.textContent = result.error;
+      resumeStatus.textContent = result.error || "Upload failed.";
       resumeStatus.style.color = "red";
     }
   } catch (err) {
@@ -94,4 +133,3 @@ resumeInput.addEventListener("change", async () => {
     resumeStatus.style.color = "red";
   }
 });
-
