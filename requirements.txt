@@ -1,9 +1,9 @@
-gunicorn
 Flask
 flask-cors
 python-dotenv
 spacy
 sentence-transformers
 pdfplumber
+gunicorn
 python-docx
-
+werkzeug
