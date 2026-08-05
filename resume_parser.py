@@ -3,8 +3,22 @@ import pdfplumber
 import docx
 import spacy
 
-# Preload spaCy model at module level
-nlp = spacy.load("en_core_web_sm")
+# Preload spaCy model at module level. If the small English model isn't
+# installed, try to download it; if that fails, fall back to a blank English
+# pipeline so the rest of the code can run (with reduced NER capabilities).
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    try:
+        from spacy.cli import download
+
+        download("en_core_web_sm")
+        nlp = spacy.load("en_core_web_sm")
+    except Exception:
+        nlp = spacy.blank("en")
+        print(
+            "Warning: spaCy model 'en_core_web_sm' not available; using blank 'en' model."
+        )
 
 def extract_text_from_pdf(file_path):
     text = ''
