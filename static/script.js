@@ -162,8 +162,65 @@ showTaxonomyBtn.addEventListener("click", async () => {
   }
 });
 
+function renderKeyValue(title, value, isHTML = false) {
+  const row = document.createElement("div");
+  row.className = "result-row";
+
+  const label = document.createElement("div");
+  label.className = "result-label";
+  label.textContent = title;
+
+  const content = document.createElement("div");
+  content.className = "result-value";
+  if (isHTML) {
+    content.innerHTML = value;
+  } else {
+    content.textContent = value;
+  }
+
+  row.appendChild(label);
+  row.appendChild(content);
+  return row;
+}
+
 function renderResults(data) {
   analysisResults.innerHTML = "";
+
+  if (data.parsed_resume) {
+    const card = document.createElement("div");
+    card.className = "result-card";
+
+    const header = document.createElement("div");
+    header.className = "result-card-header";
+    header.innerHTML = data.match_score
+      ? `<h3>Resume Match Result</h3><div class="match-score">Score: ${data.match_score}</div>`
+      : `<h3>Parsed Resume</h3>`;
+    card.appendChild(header);
+
+    const parsed = data.parsed_resume;
+    if (parsed.name) card.appendChild(renderKeyValue("Name", parsed.name));
+    if (parsed.email) card.appendChild(renderKeyValue("Email", parsed.email));
+    if (parsed.phone && parsed.phone.length)
+      card.appendChild(renderKeyValue("Phone", parsed.phone.join(", ")));
+    if (parsed.location && parsed.location.length)
+      card.appendChild(renderKeyValue("Location", parsed.location.join(", ")));
+    if (parsed.education && parsed.education.length)
+      card.appendChild(renderKeyValue("Education", parsed.education.join("; ")));
+    if (parsed.skills && Object.keys(parsed.skills).length) {
+      const skillRows = Object.entries(parsed.skills)
+        .map(([category, skills]) => `<strong>${category}:</strong> ${skills.join(", ")}`)
+        .join("<br>");
+      card.appendChild(renderKeyValue("Skills", skillRows, true));
+    }
+    if (parsed.summary && parsed.summary.length)
+      card.appendChild(renderKeyValue("Summary", parsed.summary.join(" ")));
+    if (parsed.experience && parsed.experience.length)
+      card.appendChild(renderKeyValue("Experience", parsed.experience.join(", ")));
+
+    analysisResults.appendChild(card);
+    return;
+  }
+
   const pre = document.createElement("pre");
   pre.textContent = JSON.stringify(data, null, 2);
   analysisResults.appendChild(pre);
