@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Recruitment AI Chatbot</title>
-  <link rel="stylesheet" href="../static/style.css" />
+  <link rel="stylesheet" href="/static/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"/>
 </head>
 <body>
@@ -36,6 +36,20 @@
         <input type="file" id="resume" accept=".pdf,.doc,.docx" />
         <p id="resume-status"></p>
       </div>
+    </div>
+  </section>
+
+  <section class="analyzer-section" id="analyzer">
+    <div class="analyzer-content">
+      <h2>Resume Analyzer</h2>
+      <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
+      <textarea id="job-description" placeholder="Paste a job description here..."></textarea>
+      <div class="button-row">
+        <button id="parse-text-btn">Parse Text</button>
+        <button id="match-text-btn">Match Resume</button>
+        <button id="show-taxonomy-btn">View Skill Taxonomy</button>
+      </div>
+      <div id="analysis-results" class="analysis-results"></div>
     </div>
   </section>
 
@@ -78,7 +92,7 @@
   <!-- Toast Notification -->
   <div id="toast" class="hidden"></div>
 
-  <script src="../static/script.js"></script>
+  <script src="/static/script.js"></script>
 </body>
 </html>
 

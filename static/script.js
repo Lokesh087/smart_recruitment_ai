@@ -10,6 +10,12 @@ const userInput = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 const resumeInput = document.getElementById("resume");
 const resumeStatus = document.getElementById("resume-status");
+const resumeText = document.getElementById("resume-text");
+const jobDescription = document.getElementById("job-description");
+const parseTextBtn = document.getElementById("parse-text-btn");
+const matchTextBtn = document.getElementById("match-text-btn");
+const showTaxonomyBtn = document.getElementById("show-taxonomy-btn");
+const analysisResults = document.getElementById("analysis-results");
 const toast = document.getElementById("toast");
 
 // Show/hide chatbot
@@ -89,6 +95,93 @@ async function sendMessage() {
     typingDots.remove();
     addMessage("bot", "Sorry, I couldn’t reach the server.");
   }
+}
+
+parseTextBtn.addEventListener("click", async () => {
+  const text = resumeText.value.trim();
+  if (!text) {
+    showToast("Enter resume text first.", "red");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/parse-text`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showToast(data.error || "Parse failed.", "red");
+      return;
+    }
+    renderResults(data);
+    showToast("Resume parsed successfully!");
+  } catch (err) {
+    showToast("Server error while parsing.", "red");
+  }
+});
+
+matchTextBtn.addEventListener("click", async () => {
+  const text = resumeText.value.trim();
+  const jd = jobDescription.value.trim();
+  if (!text || !jd) {
+    showToast("Provide both resume text and job description.", "red");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/match-text`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resume_text: text, job_description: jd }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showToast(data.error || "Match failed.", "red");
+      return;
+    }
+    renderResults(data);
+    showToast("Match result generated!");
+  } catch (err) {
+    showToast("Server error while matching.", "red");
+  }
+});
+
+showTaxonomyBtn.addEventListener("click", async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/skill-taxonomy`);
+    const data = await response.json();
+    if (!response.ok) {
+      showToast("Unable to load taxonomy.", "red");
+      return;
+    }
+    renderTaxonomy(data.skill_taxonomy);
+  } catch (err) {
+    showToast("Server error while loading taxonomy.", "red");
+  }
+});
+
+function renderResults(data) {
+  analysisResults.innerHTML = "";
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(data, null, 2);
+  analysisResults.appendChild(pre);
+}
+
+function renderTaxonomy(taxonomy) {
+  analysisResults.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "taxonomy-panel";
+
+  Object.entries(taxonomy).forEach(([category, skills]) => {
+    const section = document.createElement("div");
+    section.className = "taxonomy-category";
+    section.innerHTML = `<h3>${category}</h3><p>${skills.join(", ")}</p>`;
+    container.appendChild(section);
+  });
+
+  analysisResults.appendChild(container);
 }
 
 // Upload resume file to Flask backend
