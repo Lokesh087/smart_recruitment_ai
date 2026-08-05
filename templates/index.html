@@ -43,7 +43,20 @@
     <div class="analyzer-content">
       <h2>Resume Analyzer</h2>
       <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
-      <textarea id="job-description" placeholder="Paste a job description here..."></textarea>
+
+      <div class="job-role-row">
+        <label for="job-role-select">Role template:</label>
+        <select id="job-role-select">
+          <option value="">Select a role</option>
+          <option value="Frontend Developer">Frontend Developer</option>
+          <option value="Backend Developer">Backend Developer</option>
+          <option value="Data Scientist">Data Scientist</option>
+          <option value="AI Engineer">AI Engineer</option>
+          <option value="Custom">Custom Role</option>
+        </select>
+      </div>
+
+      <textarea id="job-description" placeholder="Paste a job description here or choose a role template..."></textarea>
       <div class="button-row">
         <button id="parse-text-btn">Parse Text</button>
         <button id="match-text-btn">Match Resume</button>

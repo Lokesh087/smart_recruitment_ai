@@ -169,6 +169,28 @@ body {
   font-size: 14px;
 }
 
+.job-role-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 8px;
+}
+
+.job-role-row label {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.job-role-row select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background: white;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;

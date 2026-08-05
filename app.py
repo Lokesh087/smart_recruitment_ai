@@ -54,6 +54,7 @@ def upload_resume():
 
         return jsonify({
             'message': f'Resume uploaded successfully: {filename}',
+            'resume_text': text,
             'parsed_resume': parsed,
             'match_score': f"{score}%"
         }), 200

@@ -11,12 +11,20 @@ const chatBox = document.getElementById("chat-box");
 const resumeInput = document.getElementById("resume");
 const resumeStatus = document.getElementById("resume-status");
 const resumeText = document.getElementById("resume-text");
+const jobRoleSelect = document.getElementById("job-role-select");
 const jobDescription = document.getElementById("job-description");
 const parseTextBtn = document.getElementById("parse-text-btn");
 const matchTextBtn = document.getElementById("match-text-btn");
 const showTaxonomyBtn = document.getElementById("show-taxonomy-btn");
 const analysisResults = document.getElementById("analysis-results");
 const toast = document.getElementById("toast");
+
+const jobRoleTemplates = {
+  "Frontend Developer": "Seeking a Frontend Developer with strong experience in HTML, CSS, JavaScript, React, responsive user interfaces, and collaboration with design teams.",
+  "Backend Developer": "Looking for a Backend Developer skilled in Python, Node.js, REST APIs, database modeling, microservices, and cloud deployment.",
+  "Data Scientist": "Hiring a Data Scientist with expertise in machine learning, data analysis, statistical modeling, Python, SQL, and communicating actionable insights.",
+  "AI Engineer": "Seeking an AI Engineer experienced in deep learning, NLP, model deployment, TensorFlow/PyTorch, and building production-grade AI systems.",
+};
 
 // Show/hide chatbot
 openBtn.addEventListener("click", () => {
@@ -53,6 +61,16 @@ function showToast(message, color = "#27ae60") {
     toast.classList.add("hidden");
   }, 3000);
 }
+
+jobRoleSelect.addEventListener("change", () => {
+  const selectedRole = jobRoleSelect.value;
+  if (selectedRole === "Custom") {
+    jobDescription.value = "";
+    jobDescription.focus();
+    return;
+  }
+  jobDescription.value = selectedRole ? jobRoleTemplates[selectedRole] || "" : "";
+});
 
 // Send chat message to Flask backend
 async function sendMessage() {
@@ -268,7 +286,9 @@ resumeInput.addEventListener("change", async () => {
 
   const formData = new FormData();
   formData.append("resume", file);
-  formData.append("job_description", "Frontend Developer"); // default or dynamic
+  const selectedRole = jobRoleSelect.value;
+  const fillJobDescription = jobDescription.value.trim() || (selectedRole ? jobRoleTemplates[selectedRole] : "");
+  formData.append("job_description", fillJobDescription || "Candidate for technical role");
 
   resumeStatus.textContent = "Uploading...";
   resumeStatus.style.color = "#3498db";
@@ -285,6 +305,12 @@ resumeInput.addEventListener("change", async () => {
       resumeStatus.textContent = result.message;
       resumeStatus.style.color = "#27ae60";
       resumeInput.value = "";
+      if (result.resume_text) {
+        resumeText.value = result.resume_text;
+      }
+      if (result.parsed_resume) {
+        renderResults(result);
+      }
       showToast("Resume uploaded successfully!");
     } else {
       resumeStatus.textContent = result.error || "Upload failed.";
