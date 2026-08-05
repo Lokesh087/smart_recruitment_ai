@@ -2,23 +2,37 @@ import os
 import pdfplumber
 import docx
 import spacy
+from spacy.util import is_package
 
-# Preload spaCy model at module level. If the small English model isn't
-# installed, try to download it; if that fails, fall back to a blank English
-# pipeline so the rest of the code can run (with reduced NER capabilities).
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
+nlp = None
+
+
+def get_nlp():
+    global nlp
+    if nlp is not None:
+        return nlp
+
     try:
-        from spacy.cli import download
-
-        download("en_core_web_sm")
         nlp = spacy.load("en_core_web_sm")
-    except Exception:
-        nlp = spacy.blank("en")
-        print(
-            "Warning: spaCy model 'en_core_web_sm' not available; using blank 'en' model."
-        )
+    except OSError:
+        if is_package("en_core_web_sm"):
+            print(
+                "Warning: spaCy model 'en_core_web_sm' failed to load; using blank 'en' model."
+            )
+            nlp = spacy.blank("en")
+        else:
+            try:
+                from spacy.cli import download
+
+                download("en_core_web_sm")
+                nlp = spacy.load("en_core_web_sm")
+            except Exception:
+                nlp = spacy.blank("en")
+                print(
+                    "Warning: spaCy model 'en_core_web_sm' not available; using blank 'en' model."
+                )
+    return nlp
+
 
 def extract_text_from_pdf(file_path):
     text = ''
@@ -27,9 +41,11 @@ def extract_text_from_pdf(file_path):
             text += page.extract_text() or ''
     return text
 
+
 def extract_text_from_docx(file_path):
     doc = docx.Document(file_path)
     return "\n".join([para.text for para in doc.paragraphs])
+
 
 def extract_resume_text(file_path):
     ext = os.path.splitext(file_path)[1].lower()
@@ -39,8 +55,10 @@ def extract_resume_text(file_path):
         return extract_text_from_docx(file_path)
     return ""
 
+
 def parse_resume(text):
-    doc = nlp(text)
+    nlp_model = get_nlp()
+    doc = nlp_model(text)
     entities = {
         "email": None,
         "name": None,
