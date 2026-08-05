@@ -1,4 +1,5 @@
 import os
+import re
 import pdfplumber
 import docx
 import spacy
@@ -34,6 +35,114 @@ def get_nlp():
     return nlp
 
 
+def extract_phone_numbers(text):
+    patterns = [
+        r"\+?\d[\d\s\-()]{7,}\d",
+        r"\(\d{3}\)\s*\d{3}[\-\s]\d{4}",
+    ]
+    phones = set()
+    for pattern in patterns:
+        for match in re.findall(pattern, text):
+            normalized = re.sub(r"[^+\d]", "", match)
+            if 7 <= len(normalized) <= 16:
+                phones.add(normalized)
+    return list(phones)
+
+
+def extract_education(text):
+    degrees = [
+        "bachelor", "master", "mba", "phd", "b.sc", "m.sc", "b.eng", "m.eng", "associate",
+        "certificate", "diploma",
+    ]
+    education = set()
+    for line in text.splitlines():
+        normalized = line.lower()
+        if any(degree in normalized for degree in degrees):
+            education.add(line.strip())
+    return list(education)
+
+
+SKILL_TAXONOMY = {
+    "Programming Languages": [
+        "python", "java", "javascript", "typescript", "c++", "c#", "go", "ruby",
+        "php", "swift", "kotlin", "scala", "r", "sql", "bash",
+    ],
+    "Frameworks & Libraries": [
+        "react", "angular", "vue", "django", "flask", "fastapi", "spring", "node",
+        "express", "tensorflow", "pytorch", "keras", "spark", "hadoop", "pandas",
+        "numpy", "scikit-learn", "bootstrap", "jquery", "material-ui",
+    ],
+    "Cloud & DevOps": [
+        "aws", "azure", "gcp", "docker", "kubernetes", "terraform", "ansible",
+        "jenkins", "git", "linux", "ci/cd", "docker-compose", "helm",
+    ],
+    "Data & AI": [
+        "machine learning", "deep learning", "nlp", "natural language processing",
+        "computer vision", "data science", "analytics", "data analysis", "nlp",
+    ],
+    "Soft Skills": [
+        "communication", "leadership", "teamwork", "problem solving", "project management",
+        "adaptability", "critical thinking", "time management", "collaboration",
+    ],
+    "Other": [
+        "excel", "nosql", "html", "css", "rest api", "graphql", "microservices",
+        "agile", "scrum", "problem-solving", "user interface", "ui/ux",
+    ],
+}
+
+
+def _normalize_text_for_skill_matching(text):
+    return re.sub(r"[\-_/]+", " ", text.lower())
+
+
+def extract_skills_from_text(text):
+    normalized = _normalize_text_for_skill_matching(text)
+    skill_map = {}
+    for category, skills in SKILL_TAXONOMY.items():
+        for skill in skills:
+            normalized_skill = _normalize_text_for_skill_matching(skill)
+            pattern = r"\b" + re.escape(normalized_skill) + r"\b"
+            if re.search(pattern, normalized):
+                skill_map.setdefault(category, []).append(skill)
+
+    if skill_map:
+        return {category: sorted(set(skills)) for category, skills in skill_map.items()}
+
+    nlp_model = get_nlp()
+    doc = nlp_model(normalized)
+    fallback_skills = set()
+    stop_terms = {"resume", "experience", "skills", "education", "work", "year", "years", "project"}
+    for token in doc:
+        if token.pos_ in {"NOUN", "PROPN"} and token.is_alpha:
+            term = token.text.lower()
+            if len(term) > 2 and term not in stop_terms:
+                fallback_skills.add(term)
+                if len(fallback_skills) >= 25:
+                    break
+
+    return {"Inferred Skills": sorted(fallback_skills)}
+
+
+def extract_summary(text, max_sentences=3):
+    sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
+    if len(sentences) <= max_sentences:
+        return sentences
+
+    stop_words = {
+        "and", "the", "for", "with", "that", "this", "from", "have", "has",
+        "are", "but", "not", "you", "your", "their", "our", "project",
+    }
+    sentence_scores = []
+    for sentence in sentences:
+        words = [w.lower() for w in re.findall(r"\b[a-zA-Z]{2,}\b", sentence)]
+        score = sum(1 for word in words if word not in stop_words)
+        sentence_scores.append((score, sentence))
+
+    top_sentences = [sentence for _, sentence in sorted(sentence_scores, key=lambda x: -x[0])[:max_sentences]]
+    top_sentences.sort(key=lambda s: sentences.index(s))
+    return top_sentences
+
+
 def extract_text_from_pdf(file_path):
     text = ''
     with pdfplumber.open(file_path) as pdf:
@@ -61,9 +170,13 @@ def parse_resume(text):
     doc = nlp_model(text)
     entities = {
         "email": None,
+        "phone": [],
         "name": None,
-        "skills": [],
+        "location": [],
+        "skills": {},
         "experience": [],
+        "education": [],
+        "summary": [],
     }
 
     for ent in doc.ents:
@@ -71,10 +184,16 @@ def parse_resume(text):
             entities["email"] = ent.text
         elif ent.label_ == "PERSON" and not entities["name"]:
             entities["name"] = ent.text
-        elif ent.label_ in ["ORG", "WORK_OF_ART"]:
+        elif ent.label_ in ["GPE", "LOC"]:
+            entities["location"].append(ent.text)
+        elif ent.label_ in ["ORG", "WORK_OF_ART", "PRODUCT", "NORP"]:
             entities["experience"].append(ent.text)
 
-    tokens = [token.text.lower() for token in doc if token.pos_ == "NOUN"]
-    entities["skills"] = list(set(tokens))
+    entities["phone"] = extract_phone_numbers(text)
+    entities["education"] = extract_education(text)
+    entities["skills"] = extract_skills_from_text(text)
+    entities["summary"] = extract_summary(text)
+    entities["location"] = sorted(set(entities["location"]))
+    entities["experience"] = sorted(set(entities["experience"]))
     return entities
 

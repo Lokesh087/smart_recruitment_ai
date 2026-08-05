@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
 from chatbot import get_bot_reply
-from resume_parser import extract_resume_text, parse_resume
+from resume_parser import SKILL_TAXONOMY, extract_resume_text, parse_resume
 from matcher import calculate_match_score
 
 UPLOAD_FOLDER = 'uploads'
@@ -22,6 +22,10 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     return "Smart Recruitment AI is up and running!"
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'}), 200
 
 @app.route('/api/resume', methods=['POST'])
 def upload_resume():
@@ -56,6 +60,38 @@ def upload_resume():
     except Exception as e:
         return jsonify({'error': f'Processing failed: {str(e)}'}), 500
 
+@app.route('/api/parse-text', methods=['POST'])
+def parse_text():
+    data = request.get_json()
+    text = data.get('text', '')
+    if not text:
+        return jsonify({'error': 'Empty text field'}), 400
+
+    parsed = parse_resume(text)
+    return jsonify({'parsed_resume': parsed}), 200
+
+
+@app.route('/api/match-text', methods=['POST'])
+def match_text():
+    data = request.get_json()
+    resume_text = data.get('resume_text', '')
+    job_description = data.get('job_description', '')
+    if not resume_text or not job_description:
+        return jsonify({'error': 'Both resume_text and job_description are required'}), 400
+
+    parsed = parse_resume(resume_text)
+    score = calculate_match_score(resume_text, job_description)
+    return jsonify({
+        'parsed_resume': parsed,
+        'match_score': f"{score}%"
+    }), 200
+
+
+@app.route('/api/skill-taxonomy', methods=['GET'])
+def skill_taxonomy():
+    return jsonify({'skill_taxonomy': SKILL_TAXONOMY}), 200
+
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.get_json()
@@ -65,6 +101,7 @@ def chat():
 
     response = get_bot_reply(message)
     return jsonify({'reply': response})
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
