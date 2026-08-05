@@ -62,6 +62,42 @@ def extract_education(text):
     return list(education)
 
 
+TECHNICAL_TERMS = {
+    "python", "java", "javascript", "typescript", "c++", "c#", "go", "ruby", "php",
+    "swift", "kotlin", "scala", "r", "sql", "bash", "react", "angular", "vue",
+    "django", "flask", "fastapi", "spring", "node", "express", "tensorflow",
+    "pytorch", "keras", "spark", "hadoop", "pandas", "numpy", "scikit-learn",
+    "bootstrap", "jquery", "material-ui", "aws", "azure", "gcp", "docker",
+    "kubernetes", "terraform", "ansible", "jenkins", "git", "linux", "ci/cd",
+    "docker-compose", "helm", "machine learning", "deep learning", "nlp", "data science",
+    "analytics", "data analysis", "excel", "nosql", "html", "css", "rest api",
+    "graphql", "microservices", "agile", "scrum", "ui/ux", "user interface", "project",
+    "developer", "engineer", "scientist", "manager", "lead", "architect",
+}
+
+
+def is_valid_person_name(name):
+    name_text = name.strip()
+    if not name_text:
+        return False
+
+    low = name_text.lower()
+    if any(term in low for term in TECHNICAL_TERMS):
+        return False
+    if re.search(r"\d|[@#%$^&*()_=+\\/|\[\]{}<>]", name_text):
+        return False
+
+    tokens = [token for token in re.findall(r"\b[A-Za-z]+\b", name_text)]
+    if not tokens:
+        return False
+    if len(tokens) == 1 and tokens[0].lower() in TECHNICAL_TERMS:
+        return False
+    if all(token[0].islower() for token in tokens):
+        return False
+
+    return True
+
+
 SKILL_TAXONOMY = {
     "Programming Languages": [
         "python", "java", "javascript", "typescript", "c++", "c#", "go", "ruby",
@@ -182,7 +218,7 @@ def parse_resume(text):
     for ent in doc.ents:
         if ent.label_ == "EMAIL":
             entities["email"] = ent.text
-        elif ent.label_ == "PERSON" and not entities["name"]:
+        elif ent.label_ == "PERSON" and not entities["name"] and is_valid_person_name(ent.text):
             entities["name"] = ent.text
         elif ent.label_ in ["GPE", "LOC"]:
             entities["location"].append(ent.text)
