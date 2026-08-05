@@ -1,5 +1,5 @@
 // Base URL for backend API
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = window.location.origin;
 
 // Get DOM elements
 const openBtn = document.querySelector(".open-chatbot");
