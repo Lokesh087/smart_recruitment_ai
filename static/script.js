@@ -299,10 +299,15 @@ resumeInput.addEventListener("change", async () => {
       body: formData,
     });
 
-    const result = await response.json();
+    let result = null;
+    try {
+      result = await response.json();
+    } catch (err) {
+      result = { error: "The server returned an invalid response." };
+    }
 
     if (response.ok) {
-      resumeStatus.textContent = result.message;
+      resumeStatus.textContent = result.message || "Resume processed successfully.";
       resumeStatus.style.color = "#27ae60";
       resumeInput.value = "";
       if (result.resume_text) {

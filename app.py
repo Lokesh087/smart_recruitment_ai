@@ -12,6 +12,7 @@ ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -39,9 +40,9 @@ def upload_resume():
     if not allowed_file(file.filename):
         return jsonify({'error': 'Invalid file type. Allowed: pdf, doc, docx'}), 400
 
-    job_description = request.form.get('job_description', '')
+    job_description = request.form.get('job_description', '').strip()
     if not job_description:
-        return jsonify({'error': 'Missing job_description field'}), 400
+        job_description = 'Candidate for a technical role'
 
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
