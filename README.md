@@ -1,103 +1,123 @@
 # Smart Recruitment AI
 
-A Flask-based recruitment assistant that parses resumes, matches resumes against job descriptions, and provides a chatbot interface.
+A Flask-based recruitment assistant that parses resumes, matches them against job descriptions, and provides a chatbot-style UI for recruiters.
 
 ## Features
 
-- Resume upload and parsing from PDF/DOC/DOCX files
+- Resume upload and parsing from PDF, DOC, and DOCX files
 - Raw resume text analysis
-- Semantic resume-job matching using SentenceTransformers
+- Resume-to-job matching with SentenceTransformers
 - Structured skill taxonomy for categorized skill extraction
-- Role template selection with auto-filled job descriptions
-- Custom role option for free-form job descriptions
-- Live UI for parsing, matching, and browsing the skill taxonomy
-- Health endpoint for readiness checks
+- Role templates and custom job description support
+- Simple web-based frontend for parsing, matching, and taxonomy viewing
+- Health check endpoint
 
-## Installation
+## 1. Backend setup
 
-1. Create a Python environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Install spaCy model if not already installed:
-   ```bash
-   python -m spacy download en_core_web_sm
-   ```
-
-## Running
+Open a terminal in the project folder and run:
 
 ```bash
-export FLASK_APP=app.py
-flask run --host=0.0.0.0 --port=5000
+cd /workspaces/smart_recruitment_ai
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 ```
 
-Then open the browser at `http://localhost:5000`.
+## 2. Run the backend
 
-## API Endpoints
-
-- `GET /` - Load the UI
-- `GET /health` - Service health check
-- `POST /api/resume` - Upload resume and match against job description
-- `POST /api/parse-text` - Parse resume text directly
-- `POST /api/match-text` - Match resume text against a job description
-- `GET /api/skill-taxonomy` - Return categorized skill taxonomy
-- `POST /api/chat` - Chatbot messaging endpoint
-
-## UI Usage
-
-1. Upload a resume file to parse the content and populate the analyzer.
-2. Paste or edit resume text in the analyzer.
-3. Choose a role template or select `Custom` to enter a custom job description.
-4. Click `Match Resume` to generate a match score.
-5. Click `View Skill Taxonomy` to inspect the categorized skill list.
-
-## Example API Commands
+From the project folder:
 
 ```bash
-curl -X POST http://localhost:5000/api/parse-text \
+cd /workspaces/smart_recruitment_ai
+source .venv/bin/activate
+python app.py
+```
+
+The backend will run at:
+
+```text
+http://127.0.0.1:5000
+```
+
+You can also test health with:
+
+```bash
+curl http://127.0.0.1:5000/health
+```
+
+## 3. Open the frontend
+
+Once the backend is running, open your browser at:
+
+```text
+http://127.0.0.1:5000/
+```
+
+The frontend is served directly by Flask from the templates and static files, so you do not need a separate frontend server.
+
+## 4. How to use the app
+
+1. Open the app in the browser.
+2. Upload a resume file or paste resume text into the analyzer.
+3. Choose a job role template or enter a custom job description.
+4. Click "Parse Text" to extract structured resume details.
+5. Click "Match Resume" to get a match score.
+6. Use "View Skill Taxonomy" to inspect the skill categories.
+
+## 5. API endpoints
+
+- GET / - Main web page
+- GET /health - Health check
+- POST /api/resume - Upload a resume and analyze it
+- POST /api/parse-text - Parse resume text directly
+- POST /api/match-text - Match text against a job description
+- GET /api/skill-taxonomy - Get skill categories
+- POST /api/chat - Chatbot message endpoint
+
+## 6. Example API commands
+
+Parse text:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/parse-text \
   -H "Content-Type: application/json" \
   -d '{"text": "Experienced software engineer with Python, Flask, and Docker."}'
 ```
 
+Match text:
+
 ```bash
-curl -X POST http://localhost:5000/api/match-text \
+curl -X POST http://127.0.0.1:5000/api/match-text \
   -H "Content-Type: application/json" \
-  -d '{"resume_text": "Experienced software engineer with Python, Flask, and Docker.", "job_description": "Looking for a backend developer with Python, Flask, and Docker experience."}'
+  -d '{"resume_text": "Experienced software engineer with Python, Flask, and Docker.", "job_description": "Backend developer with Python, Flask, and Docker experience."}'
 ```
 
-```bash
-curl http://localhost:5000/api/skill-taxonomy
-```
+View taxonomy:
 
 ```bash
-curl -X POST http://localhost:5000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What jobs do you have?"}'
+curl http://127.0.0.1:5000/api/skill-taxonomy
 ```
 
+Upload a resume:
+
 ```bash
-curl -X POST http://localhost:5000/api/resume \
+curl -X POST http://127.0.0.1:5000/api/resume \
   -F "resume=@/path/to/resume.pdf" \
   -F "job_description=Backend Developer role with Python and Docker"
 ```
 
-## Project Files
+## 7. Project files
 
-- `app.py` - Flask application and routes
-- `resume_parser.py` - Resume parsing, entity extraction, and skill taxonomy
-- `matcher.py` - Resume-job semantic matching with SentenceTransformers
-- `templates/index.html` - Front-end UI page
-- `static/script.js` - UI interactivity and API integration
-- `static/style.css` - UI styling
+- app.py - Flask application and routes
+- resume_parser.py - Resume parsing, entity extraction, and taxonomy logic
+- matcher.py - Resume-to-job matching logic
+- templates/index.html - Main webpage
+- static/script.js - Frontend behavior and API calls
+- static/style.css - UI styling
 
-## Notes
+## 8. Troubleshooting
 
-- The app uses lazy-loading for large models to reduce startup overhead.
-- If the spaCy model is unavailable, it falls back to a blank English pipeline.
+- If the browser shows a connection error, ensure the Flask server is still running and that you opened the correct URL.
+- If you are using a remote environment, use the forwarded port URL shown by the dev container instead of localhost.
+- For lighter deployments such as Vercel or Streamlit, the app now uses fallback parsing and keyword matching so it does not depend on the large spaCy and sentence-transformer model downloads.

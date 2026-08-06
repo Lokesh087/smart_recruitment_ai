@@ -2,10 +2,24 @@ import os
 import re
 import pdfplumber
 import docx
-import spacy
-from spacy.util import is_package
+
+try:
+    import spacy
+    from spacy.util import is_package
+except Exception:  # pragma: no cover - optional dependency for lightweight deployments
+    spacy = None
+    is_package = None
 
 nlp = None
+
+
+class _SimpleDoc:
+    def __init__(self, text):
+        self.text = text
+        self.ents = []
+
+    def __iter__(self):
+        return iter([])
 
 
 def get_nlp():
@@ -13,10 +27,14 @@ def get_nlp():
     if nlp is not None:
         return nlp
 
+    if spacy is None:
+        nlp = _SimpleDoc
+        return nlp
+
     try:
         nlp = spacy.load("en_core_web_sm")
     except OSError:
-        if is_package("en_core_web_sm"):
+        if is_package and is_package("en_core_web_sm"):
             print(
                 "Warning: spaCy model 'en_core_web_sm' failed to load; using blank 'en' model."
             )
@@ -203,7 +221,7 @@ def extract_resume_text(file_path):
 
 def parse_resume(text):
     nlp_model = get_nlp()
-    doc = nlp_model(text)
+    doc = nlp_model(text) if callable(nlp_model) else nlp_model
     entities = {
         "email": None,
         "phone": [],

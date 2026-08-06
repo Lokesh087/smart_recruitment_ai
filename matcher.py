@@ -1,14 +1,18 @@
 import re
 from collections import Counter
 
-from sentence_transformers import SentenceTransformer, util
+try:
+    from sentence_transformers import SentenceTransformer, util
+except Exception:  # pragma: no cover - optional dependency for lightweight deployments
+    SentenceTransformer = None
+    util = None
 
 model = None
 
 
 def get_match_model():
     global model
-    if model is None:
+    if model is None and SentenceTransformer is not None:
         model = SentenceTransformer("all-MiniLM-L6-v2")
     return model
 
