@@ -2,7 +2,7 @@ services:
   - type: web
     name: smart-recruitment-ai
     env: python
-    buildCommand: ""
+    buildCommand: "pip install -r requirements.txt && python scripts/setup_models.py"
     startCommand: python app.py
     branch: main
     region: oregon
